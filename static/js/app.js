@@ -12,59 +12,86 @@ function init() {
     sampleName.forEach((sample) => {
       dropdown.append("option").text(sample).property("value", sample);
     });
+
+    // Set up the first sample
     let firstSample = sampleName[0];
-    updateCharts(firstSample);
+    updateBar(firstSample);
+    updateBubble(firstSample);
+    updateMeta(firstSample);
   });
-}
-
-function updateCharts(id, sample) {
-  // Set up the variables
-  let sampleValues = sample.sample_values;
-  let otuIds = sample.otu_ids;
-  let otuLabels = sample.otu_labels;
-
-  // Update the bar chart with the top 10 OTUs found in the selected individual
-  let topOtuIds = otuIds
-    .slice(0, 10)
-    .reverse()
-    .map((otuID) => "OTU " + otuID);
-  let topOtuLabels = otuLabels.slice(0, 10).reverse();
-  let topSampleValues = sampleValues.slice(0, 10).reverse();
-
-  // Set the data for the chart
-  let trace1 = {
-    x: topSampleValues,
-    y: topOtuIds,
-    text: topOtuIds,
-    type: "bar",
-    orientation: "h",
-  };
-
-  let data1 = [trace1];
-
-  Plotly.newPlot("bar", data1);
-
-  // Update the bubble chart
-  // Set the data for the chart
-  let trace2 = {
-    x: otuIds,
-    y: sampleValues,
-    text: otuLabels,
-    mode: "markers",
-    marker: {
-      size: sampleValues,
-      color: otuIds,
-    },
-  };
-
-  let data2 = [trace2];
-
-  let layout = {
-    xaxis: { title: "OTU ID" },
-  };
-
-  Plotly.newPlot("bubble", data2, layout);
 }
 
 // Run the init function to set up the page
 init();
+
+function optionChanged(newSample) {
+  updateBar(newSample);
+  updateBubble(newSample);
+  updateMeta(newSample);
+}
+
+function updateBar(sample) {
+  d3.json(dataset).then((data) => {
+    let sampleData = data.samples;
+    let sampleFilter = sampleData.filter((sampleObj) => sampleObj.id == sample);
+    let sampleChoice = sampleFilter[0];
+    let otuIds = sampleChoice.otu_ids;
+    let otuLabels = sampleChoice.otu_labels;
+    let sampleValues = sampleChoice.sample_values;
+
+    let trace1 = [
+      {
+        x: sampleValues.slice(0, 10).reverse(),
+        y: otuIds
+          .slice(0, 10)
+          .map((id) => `OYU ${id}`)
+          .reverse(),
+        text: otuLabels.slice(0, 10).reverse(),
+        type: "bar",
+        orientation: "h",
+      },
+    ];
+
+    Plotly.newPlot("bar", trace1);
+  });
+}
+
+function updateBubble(sample) {
+  d3.json(dataset).then((data) => {
+    let sampleData = data.samples;
+    let sampleFilter = sampleData.filter((sampleObj) => sampleObj.id == sample);
+    let sampleChoice = sampleFilter[0];
+    let otuIds = sampleChoice.otu_ids;
+    let otuLabels = sampleChoice.otu_labels;
+    let sampleValues = sampleChoice.sample_values;
+
+    let trace2 = [
+      {
+        x: otuIds,
+        y: sampleValues,
+        text: otuLabels,
+        mode: "markers",
+        marker: {
+          size: sampleValues,
+          color: otuIds,
+        },
+      },
+    ];
+    Plotly.newPlot("bubble", trace2);
+  });
+}
+
+function updateMeta(sample) {
+  d3.json(dataset).then((data) => {
+    let metaData = data.metadata;
+    let metaFilter = metaData.filter((metaObj) => metaObj.id == sample);
+    let metaChoice = metaFilter[0];
+    let metaSection = d3.select("#sample-metadata");
+
+    metaSection.html("");
+
+    Object.entries(metaChoice).forEach(([key, value]) => {
+      metaSection.append("h6").text(`${key}: ${value}`);
+    });
+  });
+}
