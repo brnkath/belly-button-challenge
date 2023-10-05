@@ -13,7 +13,7 @@ function init() {
       dropdown.append("option").text(sample).property("value", sample);
     });
 
-    // Set up the first sample
+    // Set up the first sample to display on page load
     let firstSample = sampleName[0];
     updateBar(firstSample);
     updateBubble(firstSample);
@@ -21,16 +21,16 @@ function init() {
   });
 }
 
-// Run the init function to set up the page
-init();
-
+// Set up the function to update all sections when a new sample is selected
 function optionChanged(newSample) {
   updateBar(newSample);
   updateBubble(newSample);
   updateMeta(newSample);
 }
 
+// Update the bar chart
 function updateBar(sample) {
+  // Pull dataset and set up variables
   d3.json(dataset).then((data) => {
     let sampleData = data.samples;
     let sampleFilter = sampleData.filter((sampleObj) => sampleObj.id == sample);
@@ -39,12 +39,13 @@ function updateBar(sample) {
     let otuLabels = sampleChoice.otu_labels;
     let sampleValues = sampleChoice.sample_values;
 
+    // Set up the data for the updated plot
     let trace1 = [
       {
         x: sampleValues.slice(0, 10).reverse(),
         y: otuIds
           .slice(0, 10)
-          .map((id) => `OYU ${id}`)
+          .map((id) => `OTU ${id}`)
           .reverse(),
         text: otuLabels.slice(0, 10).reverse(),
         type: "bar",
@@ -52,11 +53,14 @@ function updateBar(sample) {
       },
     ];
 
+    // Update the plot
     Plotly.newPlot("bar", trace1);
   });
 }
 
+// Update bubble chart
 function updateBubble(sample) {
+  // Pull data and set up variables
   d3.json(dataset).then((data) => {
     let sampleData = data.samples;
     let sampleFilter = sampleData.filter((sampleObj) => sampleObj.id == sample);
@@ -65,6 +69,7 @@ function updateBubble(sample) {
     let otuLabels = sampleChoice.otu_labels;
     let sampleValues = sampleChoice.sample_values;
 
+    // Set up the data for the updated plot
     let trace2 = [
       {
         x: otuIds,
@@ -77,11 +82,19 @@ function updateBubble(sample) {
         },
       },
     ];
-    Plotly.newPlot("bubble", trace2);
+
+    let layout = {
+      xaxis: { title: "OTU ID" },
+    };
+
+    // Update the plot
+    Plotly.newPlot("bubble", trace2, layout);
   });
 }
 
+// Update Demographic Info section
 function updateMeta(sample) {
+  // Pull data and set up variables
   d3.json(dataset).then((data) => {
     let metaData = data.metadata;
     let metaFilter = metaData.filter((metaObj) => metaObj.id == sample);
@@ -90,8 +103,12 @@ function updateMeta(sample) {
 
     metaSection.html("");
 
+    // Pull and display each key/value pair
     Object.entries(metaChoice).forEach(([key, value]) => {
       metaSection.append("h6").text(`${key}: ${value}`);
     });
   });
 }
+
+// Run the init function to set up the page
+init();
