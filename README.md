@@ -1,5 +1,4 @@
-# belly-button-challenge
-Building an interactive dashboard to explore a belly button biodiversity dataset
+# Interactive dashboard to explore a belly button biodiversity dataset
 
 Contributor: Brian Kath
 
@@ -36,5 +35,6 @@ Finally, I pulled the key/value pairs for the demographic information associated
 <img src="images/demo_info.png" />
 
 <hr style="margin: 30px;">
+<a href="https://robdunnlab.com/projects/belly-button-biodiversity/" target="_blank">Here</a> is a link to the study website.<br/>
 The live dashboard is available here:
 <a href="https://brnkath.github.io/belly-button-challenge/" target="_blank">brnkath.github.io/belly-button-challenge/</a>
